@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <vector>
 // %EndTag(INCLUDES)%
 
@@ -14,6 +15,7 @@
 const int WIDTH = 24;      /// A lo largo del eje rojo x
 const int HEIGHT = 31;     /// A lo largo del eje verde
 
+/** Sets the cells between [i1,j1] and [i2,j2] inclusive as occupied with probability value. */
 void fillRectangle(char* data, int i1, int j1, int i2, int j2, int value)
 {
   for(int i = i1; i <= i2; i++)
@@ -25,6 +27,21 @@ void fillRectangle(char* data, int i1, int j1, int i2, int j2, int value)
   }
 }
 
+/** Receives the message of the navigation goal from rviz. */
+void receiveNavGoal(const geometry_msgs::PoseStamped& poseStamped)
+{
+  ROS_INFO("\nFrame: %s\nMove to: [%f, %f, %f] - [%f, %f, %f, %f]",
+           poseStamped.header.frame_id.c_str(),
+           poseStamped.pose.position.x,
+           poseStamped.pose.position.y,
+           poseStamped.pose.position.z,
+           poseStamped.pose.orientation.x,
+           poseStamped.pose.orientation.y,
+           poseStamped.pose.orientation.z,
+           poseStamped.pose.orientation.w);
+}
+
+
 // %Tag(INIT)%
 int main( int argc, char** argv )
 {
@@ -33,14 +50,13 @@ int main( int argc, char** argv )
   ros::Rate r(1);
   //ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   ros::Publisher marker_pub = n.advertise<nav_msgs::OccupancyGrid>("visualization_marker", 1);
+  ros::Subscriber sub = n.subscribe("/move_base_simple/goal", 5, receiveNavGoal); // Máximo 5 mensajes en la cola.
 // %EndTag(INIT)%
 
 // %Tag(MAP_INIT)%
-  while (ros::ok())
-  {
-    nav_msgs::OccupancyGrid map;
+  nav_msgs::OccupancyGrid map;
 
-    // http://docs.ros.org/api/nav_msgs/html/msg/OccupancyGrid.html
+  // http://docs.ros.org/api/nav_msgs/html/msg/OccupancyGrid.html
     map.header.frame_id = "/odom";
     map.header.stamp = ros::Time::now();   // No caduca
 
@@ -73,9 +89,12 @@ int main( int argc, char** argv )
   
 // %EndTag(MAP_INIT)%
 
+  while (ros::ok())
+  {
     marker_pub.publish(map);
 
 // %Tag(SLEEP_END)%
+    ros::spinOnce();
     r.sleep();
   }
 // %EndTag(SLEEP_END)%

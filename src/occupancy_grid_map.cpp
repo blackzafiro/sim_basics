@@ -49,7 +49,7 @@ int main( int argc, char** argv )
   ros::NodeHandle n;
   ros::Rate r(1);
   //ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-  ros::Publisher marker_pub = n.advertise<nav_msgs::OccupancyGrid>("visualization_marker", 1);
+  ros::Publisher marker_pub = n.advertise<nav_msgs::OccupancyGrid>("occupancy_marker", 1);
   ros::Subscriber sub = n.subscribe("/move_base_simple/goal", 5, receiveNavGoal); // Máximo 5 mensajes en la cola.
 // %EndTag(INIT)%
 
@@ -81,12 +81,12 @@ int main( int argc, char** argv )
     data[0] = 50;                            // El origen está en la esquina inferior izquierda.
     fillRectangle(data, 0, 1, 0, WIDTH-1, 100);   // Renglón 0. Las columnas van de 0 a WIDTH-1.  Los renglones corren sobre el eje Y.
     fillRectangle(data, 1, 0, HEIGHT-1, 0, 100);  // Columna 0. Los renglones va de 0 a HEIGHT-1.  Las columnas corren sobre el eje X.
-    
+
     //fillRectangle(data, 0, 0, 2, 2);
     //data[5*WIDTH+3] = 100;
     //data[5*WIDTH+2] = -1;
     map.data = std::vector<int8_t>(data, data + size);
-  
+
 // %EndTag(MAP_INIT)%
 
   while (ros::ok())

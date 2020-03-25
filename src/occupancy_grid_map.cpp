@@ -15,6 +15,8 @@
 const int WIDTH = 24;      /// A lo largo del eje rojo x
 const int HEIGHT = 31;     /// A lo largo del eje verde
 
+ros::Publisher marker_pub;
+
 /** Sets the cells between [i1,j1] and [i2,j2] inclusive as occupied with probability value. */
 void fillRectangle(char* data, int i1, int j1, int i2, int j2, int value)
 {
@@ -39,6 +41,20 @@ void receiveNavGoal(const geometry_msgs::PoseStamped& poseStamped)
            poseStamped.pose.orientation.y,
            poseStamped.pose.orientation.z,
            poseStamped.pose.orientation.w);
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = "/odom";
+  marker.header.stamp = ros::Time();
+  marker.type = visualization_msgs::Marker::CYLINDER;
+  marker.pose = poseStamped.pose;
+  marker.scale.x = 0.1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 1.0;
+  marker.pose.position.z = marker.scale.z/2;
+  marker.color.a = 1.0; // Don't forget to set the alpha!
+  marker.color.r = 1.0;
+  marker.color.g = 0.0;
+  marker.color.b = 0.0;
+  marker_pub.publish(marker);
 }
 
 
@@ -48,8 +64,8 @@ int main( int argc, char** argv )
   ros::init(argc, argv, "basic_map");
   ros::NodeHandle n;
   ros::Rate r(1);
-  //ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-  ros::Publisher marker_pub = n.advertise<nav_msgs::OccupancyGrid>("occupancy_marker", 1);
+  marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  ros::Publisher map_pub = n.advertise<nav_msgs::OccupancyGrid>("occupancy_marker", 1);
   ros::Subscriber sub = n.subscribe("/move_base_simple/goal", 5, receiveNavGoal); // Máximo 5 mensajes en la cola.
 // %EndTag(INIT)%
 
@@ -91,7 +107,7 @@ int main( int argc, char** argv )
 
   while (ros::ok())
   {
-    marker_pub.publish(map);
+    map_pub.publish(map);
 
 // %Tag(SLEEP_END)%
     ros::spinOnce();

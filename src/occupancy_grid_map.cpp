@@ -42,7 +42,7 @@ void receiveNavGoal(const geometry_msgs::PoseStamped& poseStamped)
            poseStamped.pose.orientation.z,
            poseStamped.pose.orientation.w);
   visualization_msgs::Marker marker;
-  marker.header.frame_id = "/odom";
+  marker.header.frame_id = "odom";
   marker.header.stamp = ros::Time();
   marker.type = visualization_msgs::Marker::CYLINDER;
   marker.pose = poseStamped.pose;
@@ -73,7 +73,7 @@ int main( int argc, char** argv )
   nav_msgs::OccupancyGrid map;
 
   // http://docs.ros.org/api/nav_msgs/html/msg/OccupancyGrid.html
-    map.header.frame_id = "/odom";
+    map.header.frame_id = "odom";
     map.header.stamp = ros::Time::now();   // No caduca
 
     map.info.resolution = 0.3;             // [m/cell]
